@@ -1,6 +1,5 @@
 from firedrake import *
 from FPCD import*
-from PCD import*
 
 print = PETSc.Sys.Print
 
@@ -24,15 +23,12 @@ bcs = [DirichletBC(Z.sub(0), Constant((1, 0, 0)), 4), DirichletBC(Z.sub(0), Cons
 
 nullspace = MixedVectorSpaceBasis(Z, [Z.sub(0), VectorSpaceBasis(constant=True)])
 
-#appctx = {"Re": Re, "velocity_space": 0}
 appctx = {"nu": nu, "velocity_space": 0}
 
-parLSC = {
+LSC = {
         "ksp_type": "fgmres",
         "ksp_monitor":None,
-        #"ksp_max_it":100000,
-        "ksp_gmres_restart":600,#200#600#500
-        #"ksp_rtol":1e-6,
+        "ksp_gmres_restart":600,
         "snes_monitor":None,
         "snes_converged_reason":None,
         "ksp_gmres_modifiedgramschmidt":True,
@@ -41,60 +37,43 @@ parLSC = {
         "pc_fieldsplit_schur_fact_type":"upper",
         "fieldsplit_0":{
             "ksp_type":"preonly",
-            #"ksp_max_it":2,
-            #"ksp_gmres_restart":20, #50
-            #"ksp_monitor":None,
             "pc_type":"hypre",
-            #"pc_hypre_boomeramg_max_it":3,
                         },
         "fieldsplit_1":{
-            "ksp_type":"preonly",#gmres
+            "ksp_type":"preonly",
             "pc_type":"lsc",
-            #"pc_lsc_scale_diag":None,
             "lsc_pc_type":"lu",
             "lsc_pc_factor_mat_solver_type":"mumps",
-            #"lsc_pc_sub_type":"ilu",
-            #"lsc_pc_ksp_type":"richardson",#gmres
-            #"lsc_pc_ksp_max_it":2,
-            #"lsc_pc_ksp_gmres_restart":50,
-            #"lsc_pc_pc_type":"hypre",#bjacobi
-            #"lsc_pc_pc_hypre_type":"boomeramg",  
-            #"lsc_pc_pc_hypre_boomeramg_strong_threshold": 0.2,       
-            #"lsc_pc_pc_hypre_boomeramg_P_max":2,
-            #"lsc_pc_ksp_rtol":1e-4,
                         }
         }
 
 
-parDIR={"snes_monitor": None,
+MUMPS = {
+        "snes_monitor": None,
         "snes_max_it":1000,
         "ksp_type": "preonly",
         "mat_type": "aij",
         "pc_type": "lu",
-        "pc_factor_mat_solver_type": "mumps"}
+        "pc_factor_mat_solver_type": "mumps"
+        }
 
-parPCD = {
+PCD = {
         "mat_type": "matfree",
         "snes_monitor": None,
         "ksp_monitor":None,
         "ksp_type": "fgmres",
-        #"ksp_rtol": 1e-9,
         "ksp_gmres_restart": 600,
         "ksp_gmres_modifiedgramschmidt": None,
-        #"ksp_monitor_true_residual": None,
         "pc_type": "fieldsplit",
         "pc_fieldsplit_type": "schur",
         "pc_fieldsplit_schur_fact_type": "upper",
 
         "fieldsplit_0_ksp_type": "preonly",
-        #"fieldsplit_0_ksp_gmres_restart": 50,
         "fieldsplit_0_pc_type": "python",
         "fieldsplit_0_pc_python_type": "firedrake.AssembledPC",
         "fieldsplit_0_assembled_pc_type": "hypre",
-        #"fieldsplit_0_assembled_pc_sub_type": "ilu",
 
         "fieldsplit_1_ksp_type": "preonly",
-        #"fieldsplit_1_ksp_rtol": 1e-4,
         "fieldsplit_1_pc_type": "python",
         "fieldsplit_1_pc_python_type": "FPCD.PCD",
 
@@ -129,20 +108,16 @@ up.assign(0)
 print('Cells: ', up.function_space().mesh().num_cells())
 print('Z dim: ', Z.dim())
 
-solver = create_solver(parLSC, appctx=appctx)
-
-#w.assign(0)
-
+solver = create_solver(LSC, appctx=appctx)
 solver.solve()
-print('Z dim: ', Z.dim())
-print('Cells: ', up.function_space().mesh().num_cells())
-#solve(F == 0, up, bcs=bcs, nullspace=nullspace, solver_parameters=parPCD, appctx=appctx)
+
+#print('Z dim: ', Z.dim())
+#print('Cells: ', up.function_space().mesh().num_cells())
+
 
 #u, p = up.split()
 #u.rename("Velocity")
 #p.rename("Pressure")
-
 #File("cavity.pvd").write(u, p)
 
-convergence(solver)
-
+#convergence(solver)
