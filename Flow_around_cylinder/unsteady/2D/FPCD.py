@@ -4,7 +4,6 @@ import copy
 from firedrake import Function
 from firedrake import*
 
-
 class PCD(PCBase):
 
     needs_python_pmat = True
@@ -13,7 +12,6 @@ class PCD(PCBase):
         from firedrake import TrialFunction, TestFunction, Function, DirichletBC, dx, \
              assemble, Mesh, inner, grad, split, Constant, parameters
         from firedrake.assemble import allocate_matrix, create_assembly_callable
-        #from assamble1 import allocate_matrix, apply_bcs, create_assembly_callable
 
         prefix = pc.getOptionsPrefix() + "pcd_"
 
@@ -30,16 +28,13 @@ class PCD(PCBase):
         nu = context.appctx["nu"]
         dt = context.appctx["dt"]
 
-        # pressure mass matri
         mass = (1.0/nu)*p*q*dx
-        # stiffness matrix
+
         stiffness = inner(grad(p), grad(q))*dx
         
         velid = context.appctx["velocity_space"]
-        #preid = context.appctx["pressure_space"]
 
         self.bcs = context.appctx["PCDbc"]
-        #self.bcs = DirichletBC(Q,0,2)
 
         opts = PETSc.Options()
         
@@ -73,9 +68,6 @@ class PCD(PCBase):
         Kksp.setUp()
         Kksp.setFromOptions()
         self.Kksp = Kksp
-
-        #state = context.appctx["state"]
-        #velid = context.appctx["velocity_space"]
         
         u=context.appctx["u"]
         fp = (1.0/nu)*((1.0/dt)*p + dot(u,grad(p)))*q*dx
@@ -95,9 +87,7 @@ class PCD(PCBase):
         self.tmp = Function(Q)
     
     def update(self, pc):
-        #print("PC UPDATE")
         self._assemble_Fp()
-
 
     def apply(self, pc, x, y):
         a, b = self.workspace
@@ -108,7 +98,7 @@ class PCD(PCBase):
 
         with self.tmp.dat.vec_wo as v:
             b.copy(v)
-        # Now tmp contains the value from `b`
+
         self.bcs.apply(self.tmp)
         with self.tmp.dat.vec_ro as v:
             v.copy(b)
@@ -118,7 +108,6 @@ class PCD(PCBase):
         y.scale(-1.0)
 
     def applyTranspose(self, pc, x, y):
-        print("TRANSPOSE")
         pass
 
     def view(self, pc, viewer=None):
