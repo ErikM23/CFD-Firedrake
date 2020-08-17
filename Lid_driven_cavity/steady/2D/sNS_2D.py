@@ -48,7 +48,7 @@ LSC = {
         }
 
 
-DIR={
+DIR ={
         "snes_monitor": None,
         "snes_max_it":1000,
         "ksp_type": "preonly",
