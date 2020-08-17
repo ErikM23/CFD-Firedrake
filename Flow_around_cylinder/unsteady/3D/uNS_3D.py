@@ -60,7 +60,6 @@ parPCD = {
         "ksp_rtol":1e-1,
         "ksp_gmres_restart": 100,
         "pc_type":"python",
-        #"pc_side":"right",
         "pc_python_type": "firedrake.AssembledPC",
         "assembled_pc_type": "bjacobi",
         },
@@ -110,8 +109,6 @@ theta = Constant(0.5)
 
 def F_(u,p,v,q) :
         return  ( nu*inner(grad(u),grad(v))*dx + inner(dot(grad(u),u),v)*dx - p*div(v)*dx + q*div(u)*dx)
-        
-    
 
 F = Constant(1.0/dt)*inner((u-u0),v)*dx + theta* F_(u,p,v,q) +(1-theta)*F_(u0,p0,v,q)    
    
