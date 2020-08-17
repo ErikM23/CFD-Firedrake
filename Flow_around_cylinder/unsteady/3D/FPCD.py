@@ -4,7 +4,6 @@ import copy
 from firedrake import Function
 from firedrake import*
 
-
 class PCD(PCBase):
 
     needs_python_pmat = True
@@ -30,7 +29,7 @@ class PCD(PCBase):
         dt = context.appctx["dt"]
 
         mass = (1.0/nu)*p*q*dx
-        # stiffness matrix
+
         stiffness = inner(grad(p), grad(q))*dx
         
         velid = context.appctx["velocity_space"]
@@ -47,7 +46,6 @@ class PCD(PCBase):
         Mp = assemble(mass, form_compiler_parameters=context.fc_params,
                       mat_type=Mp_mat_type,
                       options_prefix=prefix + "Mp_")
-        
         
         Kp = assemble(stiffness, bcs=self.bcs, form_compiler_parameters=context.fc_params,
                       mat_type=Kp_mat_type,
@@ -107,7 +105,6 @@ class PCD(PCBase):
         y.scale(-1.0)
 
     def applyTranspose(self, pc, x, y):
-        print("TRANSPOSE")
         pass
 
     def view(self, pc, viewer=None):
